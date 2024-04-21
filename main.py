@@ -17,17 +17,27 @@ def main():
         box_width = 600
         margin = 30
 
-        pygame.draw.rect(screen, (50, 50, 50), (dist_from_left, dist_from_top, box_width, 800))
         font = pygame.font.SysFont(None, 24)
 
         text = "I want you to know, brothers, that what has happened to me has really served to advance the gospel, so that it has become known throughout the whole imperial guard and to all the rest that my imprisonment is for Christ. And most of the brothers, having become confident in the Lord by my imprisonment, are much more bold to speak the word without fear."
-        max_length = box_width - (2 * margin)
-        words = text.split(" ")
+        split_text = []
+        pre, mid, post = text.partition("gospel")
+        split_text.append(pre + mid)
+        split_text.append(post)
+        vertical_offset = 0
 
-        lines = wrap_text(words, font, max_length)
+        for text in split_text:
+            max_length = box_width - (2 * margin)
+            words = text.split(" ")
 
-        write_lines(lines, font, screen, dist_from_left + margin, dist_from_top + margin)
+            lines = wrap_text(words, font, max_length)
 
+            text_block_height = wrapped_text_height(lines, font)
+            pygame.draw.rect(screen, (50, 50, 50), (dist_from_left, dist_from_top + vertical_offset, box_width, text_block_height + 2 * margin))
+            write_lines(lines, font, screen, dist_from_left + margin, dist_from_top + vertical_offset + margin)
+            vertical_offset += text_block_height + 2 * margin
+
+        # Output what we've drawn to the screen
         pygame.display.flip()
 
     pygame.quit()
@@ -39,7 +49,7 @@ def wrap_text(words, font, max_length):
     ghostline = ""
 
     for word in words:
-        ghostline = ghostline + word + " "
+        ghostline += word + " "
         ghostline_length, _ = font.size(ghostline)
         if ghostline_length > max_length:
             lines.append(line)
@@ -57,13 +67,20 @@ def write_lines(lines, font, screen, x, y):
     for line in lines:
         write_line(line, font, screen, x, y + total_line_height)
         _, line_height = font.size(line)
-        total_line_height = total_line_height + line_height
+        total_line_height += line_height
 
 
 def write_line(line, font, screen, x, y):
     text_block = font.render(line, True, (255, 255, 255))
     screen.blit(text_block, (x, y))
 
+def wrapped_text_height(lines, font):
+    total_line_height = 0
+    for line in lines:
+        _, line_height = font.size(line)
+        total_line_height += line_height
+
+    return total_line_height
 
 if __name__ == "__main__":
     main()
