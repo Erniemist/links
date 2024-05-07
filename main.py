@@ -24,18 +24,29 @@ def main():
         pre, mid, post = text.partition("gospel")
         split_text.append(pre + mid)
         split_text.append(post)
-        vertical_offset = 0
+        """things to draw: text boxes (n, where n = each text in split_text) & text (1:1). 
+Make a list of box starting heights
+        """
 
+        vertical_offset = 0
+        text_blocks = []
         for text in split_text:
+            text_block = {}
             max_length = box_width - (2 * margin)
             words = text.split(" ")
-
             lines = wrap_text(words, font, max_length)
-
             text_block_height = wrapped_text_height(lines, font)
-            pygame.draw.rect(screen, (50, 50, 50), (dist_from_left, dist_from_top + vertical_offset, box_width, text_block_height + 2 * margin))
-            write_lines(lines, font, screen, dist_from_left + margin, dist_from_top + vertical_offset + margin)
+
+            text_block["y"] = dist_from_top + vertical_offset
+            text_block["height"] = text_block_height + 2 * margin
+            text_block["text"] = lines
+            text_blocks.append(text_block)
+
             vertical_offset += text_block_height + 2 * margin
+
+        for text_block in text_blocks:
+            pygame.draw.rect(screen, (50, 50, 50), (dist_from_left, text_block["y"], box_width, text_block["height"]))
+            write_lines(text_block["text"], font, screen, dist_from_left + margin, text_block["y"] + margin)
 
         # Output what we've drawn to the screen
         pygame.display.flip()
