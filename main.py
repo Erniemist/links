@@ -24,25 +24,8 @@ def main():
         pre, mid, post = text.partition("gospel")
         split_text.append(pre + mid)
         split_text.append(post)
-        """things to draw: text boxes (n, where n = each text in split_text) & text (1:1). 
-Make a list of box starting heights
-        """
 
-        vertical_offset = 0
-        text_blocks = []
-        for text in split_text:
-            text_block = {}
-            max_length = box_width - (2 * margin)
-            words = text.split(" ")
-            lines = wrap_text(words, font, max_length)
-            text_block_height = wrapped_text_height(lines, font)
-
-            text_block["y"] = dist_from_top + vertical_offset
-            text_block["height"] = text_block_height + 2 * margin
-            text_block["text"] = lines
-            text_blocks.append(text_block)
-
-            vertical_offset += text_block_height + 2 * margin
+        text_blocks = text_block_create(split_text, font, box_width, margin, dist_from_top)
 
         for text_block in text_blocks:
             pygame.draw.rect(screen, (50, 50, 50), (dist_from_left, text_block["y"], box_width, text_block["height"]))
@@ -52,6 +35,23 @@ Make a list of box starting heights
         pygame.display.flip()
 
     pygame.quit()
+
+
+def text_block_create(split_text, font, box_width, margin, dist_from_top):
+    vertical_offset = 0
+    text_blocks = []
+    for text in split_text:
+        lines = wrap_text(words=text.split(" "), font=font, max_length=box_width - (2 * margin))
+        box_height = wrapped_text_height(lines, font) + 2 * margin
+
+        text_blocks.append({
+            "y": dist_from_top + vertical_offset,
+            "height": box_height,
+            "text": lines,
+        })
+
+        vertical_offset += box_height
+    return text_blocks
 
 
 def wrap_text(words, font, max_length):
@@ -85,6 +85,7 @@ def write_line(line, font, screen, x, y):
     text_block = font.render(line, True, (255, 255, 255))
     screen.blit(text_block, (x, y))
 
+
 def wrapped_text_height(lines, font):
     total_line_height = 0
     for line in lines:
@@ -92,6 +93,7 @@ def wrapped_text_height(lines, font):
         total_line_height += line_height
 
     return total_line_height
+
 
 if __name__ == "__main__":
     main()
