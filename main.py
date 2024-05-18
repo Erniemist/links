@@ -2,7 +2,15 @@ import pygame
 
 
 def main():
+    text = read_text("text_to_read.txt")
+
+    dist_from_left = 900
+    dist_from_top = 100
+    box_width = 600
+    margin = 30
+
     pygame.init()
+    font = pygame.font.SysFont(None, 24)
     screen = pygame.display.set_mode([1600, 1000])
     running = True
     while running:
@@ -12,14 +20,6 @@ def main():
 
         screen.fill((0, 0, 0))
 
-        dist_from_left = 900
-        dist_from_top = 100
-        box_width = 600
-        margin = 30
-
-        font = pygame.font.SysFont(None, 24)
-
-        text = "I want you to know, brothers, that what has happened to me has really served to advance the gospel, so that it has become known throughout the whole imperial guard and to all the rest that my imprisonment is for Christ. And most of the brothers, having become confident in the Lord by my imprisonment, are much more bold to speak the word without fear."
         split_text = []
         pre, mid, post = text.partition("gospel")
         split_text.append(pre + mid)
@@ -35,6 +35,14 @@ def main():
         pygame.display.flip()
 
     pygame.quit()
+
+
+def read_text(file_name):
+    file = open(file_name, "r")
+    content = file.read()
+    file.close()
+
+    return content
 
 
 def text_block_create(split_text, font, box_width, margin, dist_from_top):
