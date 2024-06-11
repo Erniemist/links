@@ -44,21 +44,17 @@ def main():
 
 def split_text(text):
     words = text.split(" ")
-    positions = read_text("split_positions.txt")
-    segment_end_positions = []
-    position_strings = positions.split(",")
-    for position_string in position_strings:
-        segment_end_positions.append(int(position_string))
-
-    segment_end_positions.append(len(words))
+    segment_end_positions = [
+        int(position_string)
+        for position_string in read_text("split_positions.txt").split(",")
+    ] + [len(words)]
 
     segment_start_positions = [0] + segment_end_positions[:-1]
 
-    text_segments = []
-    for start,end in zip(segment_start_positions,segment_end_positions):
-        text_segments.append(words[start:end])
-
-    return text_segments
+    return [
+        words[start:end]
+        for start, end in zip(segment_start_positions, segment_end_positions)
+    ]
 
 
 def read_text(file_name):
