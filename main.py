@@ -1,8 +1,10 @@
 import pygame
+import time
 
 
 def main():
     text = read_text("text_to_read.txt")
+    partitioned_text = split_text(text)
 
     dist_from_left = 900
     dist_from_top = 100
@@ -10,22 +12,25 @@ def main():
     margin = 30
 
     pygame.init()
+    prev_time = time.time()
+    FPS = 30
     font = pygame.font.SysFont(None, 24)
     screen = pygame.display.set_mode([1600, 1000])
     running = True
     while running:
+        current_time = time.time()
+        dt = current_time - prev_time
+        prev_time = current_time
+        sleep_time = 1. / FPS - dt
+        if sleep_time > 0:
+            time.sleep(sleep_time)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
         screen.fill((0, 0, 0))
 
-        split_text = []
-        pre, mid, post = text.partition("gospel")
-        split_text.append(pre + mid)
-        split_text.append(post)
-
-        text_blocks = text_block_create(split_text, font, box_width, margin, dist_from_top)
+        text_blocks = text_block_create(partitioned_text, font, box_width, margin, dist_from_top)
 
         for text_block in text_blocks:
             pygame.draw.rect(screen, (50, 50, 50), (dist_from_left, text_block["y"], box_width, text_block["height"]))
@@ -37,11 +42,29 @@ def main():
     pygame.quit()
 
 
+def split_text(text):
+    words = text.split(" ")
+    positions = read_text("split_positions.txt")
+    segment_end_positions = []
+    position_strings = positions.split(",")
+    for position_string in position_strings:
+        segment_end_positions.append(int(position_string))
+
+    segment_end_positions.append(len(words))
+
+    segment_start_positions = [0] + segment_end_positions[:-1]
+
+    text_segments = []
+    for start,end in zip(segment_start_positions,segment_end_positions):
+        text_segments.append(words[start:end])
+
+    return text_segments
+
+
 def read_text(file_name):
     file = open(file_name, "r")
     content = file.read()
     file.close()
-
     return content
 
 
@@ -49,7 +72,7 @@ def text_block_create(split_text, font, box_width, margin, dist_from_top):
     vertical_offset = 0
     text_blocks = []
     for text in split_text:
-        lines = wrap_text(words=text.split(" "), font=font, max_length=box_width - (2 * margin))
+        lines = wrap_text(words=text, font=font, max_length=box_width - (2 * margin))
         box_height = wrapped_text_height(lines, font) + 2 * margin
 
         text_blocks.append({
